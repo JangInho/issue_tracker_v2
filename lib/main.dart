@@ -131,7 +131,6 @@ class RankingCell extends StatefulWidget {
 }
 
 class _RankingCellState extends State<RankingCell> with TickerProviderStateMixin {
-
   late AnimationController _animationController;
   late Animation<double> _animation;
 
@@ -141,10 +140,8 @@ class _RankingCellState extends State<RankingCell> with TickerProviderStateMixin
   void initState() {
     super.initState();
 
-    _animationController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 100));
-    _animation =
-    Tween<double>(begin: 1, end: 0.97).animate(_animationController)
+    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 100));
+    _animation = Tween<double>(begin: 1, end: 0.96).animate(_animationController)
       ..addListener(() {
         setState(() {});
       });
@@ -153,8 +150,7 @@ class _RankingCellState extends State<RankingCell> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapCancel:() async {
-
+      onTapCancel: () async {
         print('tap cancel');
         setState(() {
           isTapDown = false;
@@ -163,10 +159,10 @@ class _RankingCellState extends State<RankingCell> with TickerProviderStateMixin
       },
       onTapDown: (TapDownDetails details) async {
         print('tap down');
+        await _animationController.forward();
         setState(() {
           isTapDown = true;
         });
-        await _animationController.forward();
       },
       onTapUp: (TapUpDetails details) async {
         print('tap up');
@@ -175,10 +171,11 @@ class _RankingCellState extends State<RankingCell> with TickerProviderStateMixin
         });
         await _animationController.animateBack(0);
       },
-      onTap: () {
+      onTap: () async {
+        print('onTap');
+        await Future.delayed(const Duration(milliseconds: 30));
         Navigator.of(context).push(MaterialPageRoute(builder: (context) => const DetailScreen()));
       },
-
       child: ScaleTransition(
         scale: _animation,
         child: Container(
@@ -195,14 +192,18 @@ class _RankingCellState extends State<RankingCell> with TickerProviderStateMixin
                     width: 40,
                     child:
                         Text('${widget.index + 1}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800))),
-                const Text('장인호', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                const SizedBox(
-                  width: 10,
+                const Row(
+                  children: [
+                    Text('장인호', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      'new',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.red),
+                    )
+                  ],
                 ),
-                const Text(
-                  'new',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.red),
-                )
               ],
             ),
           ),
