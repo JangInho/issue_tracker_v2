@@ -1,5 +1,15 @@
 import 'package:flutter/material.dart';
 
+enum TendencyType {
+  red('보수', Color(0xFFF8462F)),
+  blue('진보', Color(0xFF305FF2));
+
+  const TendencyType(this.text, this.color);
+
+  final String text;
+  final Color color;
+}
+
 class DetailScreen extends StatelessWidget {
   const DetailScreen({super.key});
 
@@ -23,10 +33,7 @@ class DetailScreen extends StatelessWidget {
             children: [
               const Text(
                 '장인호 new',
-                style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 32,
-                    color: Colors.black),
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 32, color: Colors.black),
               ),
               const SizedBox(height: 12),
               const Text(
@@ -48,19 +55,14 @@ class DetailScreen extends StatelessWidget {
                   const Spacer(),
                   Text(
                     '진보',
-                    style: TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.w500, color: blue),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: blue),
                   ),
                   const Spacer(),
                   const SizedBox(
                     width: 64,
                   ),
                   const Spacer(),
-                  Text('보수',
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w500,
-                          color: red)),
+                  Text('보수', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: red)),
                   const Spacer(),
                 ],
               ),
@@ -76,50 +78,16 @@ class DetailScreen extends StatelessWidget {
                       width: double.infinity,
                       child: Row(
                         children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text('진보',
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                        color: blue)),
-                                Container(
-                                  height: 10,
-                                  width: 30,
-                                  color: blue,
-                                ),
-                              ],
-                            ),
-                          ),
+                          _buildLinearGraphCell(type: TendencyType.blue, title: '진보!!!!'),
                           SizedBox(
                             width: 40,
                             child: Center(
                                 child: Text(
                               '${index + 1}',
-                              style: const TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w600),
+                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                             )),
                           ),
-                          Expanded(
-                            flex: 1,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('보수',
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w400,
-                                        color: red)),
-                                Container(
-                                  height: 10,
-                                  width: 100,
-                                  color: red,
-                                ),
-                              ],
-                            ),
-                          ),
+                          _buildLinearGraphCell(type: TendencyType.red, title: '보수!!!'),
                         ],
                       ),
                     );
@@ -133,5 +101,21 @@ class DetailScreen extends StatelessWidget {
             ],
           ),
         ));
+  }
+
+  Expanded _buildLinearGraphCell({required TendencyType type, required String title}) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: type == TendencyType.blue ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: type.color)),
+          Container(
+            height: 10,
+            width: 60,
+            color: type.color,
+          ),
+        ],
+      ),
+    );
   }
 }
