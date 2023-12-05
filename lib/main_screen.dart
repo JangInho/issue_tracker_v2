@@ -1,7 +1,27 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:issue_tracker_v2/detail_screen.dart';
+import 'package:http/http.dart' as http;
+
+class _Top10Model {
+  final String cacheTime;
+  final List<String> keywords;
+
+  _Top10Model(this.cacheTime, this.keywords);
+
+  _Top10Model.fromJson(Map<String, dynamic> json)
+      : cacheTime = json['cache_time'] as String,
+        keywords = List<String>.from(json['keywords'].map((x) => x as String));
+
+  Map<String, dynamic> toJson() => {
+        'cache_time': cacheTime,
+        'keywords': keywords,
+      };
+}
 
 class IssueTrackerMain extends StatefulWidget {
   const IssueTrackerMain({super.key});
@@ -11,111 +31,107 @@ class IssueTrackerMain extends StatefulWidget {
 }
 
 class _IssueTrackerMainState extends State<IssueTrackerMain> {
-  double translationValue = 0.0;
+  _Top10Model? _data;
 
-  Map<String, dynamic> dummy = {
-    'data': [
-      {'rank': 1, 'key_word': '장인호', 'up': 3},
-      {'rank': 1, 'key_word': '장인호', 'up': 3},
-      {'rank': 1, 'key_word': '장인호', 'up': 3},
-      {'rank': 1, 'key_word': '장인호', 'up': 3},
-      {'rank': 1, 'key_word': '장인호', 'up': 3},
-      {'rank': 1, 'key_word': '장인호', 'up': 3},
-      {'rank': 1, 'key_word': '장인호', 'up': 3},
-      {'rank': 1, 'key_word': '장인호', 'up': 3},
-    ]
-  };
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  void _loadData() async {
+    final response = await http.get(
+        Uri.parse(
+            'https://4hthfqzswiu4gm5f462wcuuuuy0mdjef.lambda-url.ap-northeast-2.on.aws/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        });
+    setState(() {
+      _data = _Top10Model.fromJson(
+          jsonDecode(response.body) as Map<String, dynamic>);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(
-                  DateFormat('yyyy.MM.dd. (E)', 'ko_KR').format(DateTime.now()),
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 26,
-                      color: Colors.black),
-                ),
-                const SizedBox(width: 14),
-                Column(
+      body: SafeArea(
+        child: _data == null
+            ? const Center(child: CircularProgressIndicator())
+            : Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Transform(
-                        alignment: Alignment.center,
-                        transform: Matrix4.rotationZ(90 * 3.1415926535 / 180),
-                        child: const Icon(Icons.arrow_back_ios_rounded)),
-                    Transform(
-                        alignment: Alignment.center,
-                        transform: Matrix4.rotationZ(270 * 3.1415926535 / 180),
-                        child: const Icon(Icons.arrow_back_ios_rounded)),
+                    Row(
+                      children: [
+                        Text(
+                          DateFormat('yyyy.M.d.(E)', 'ko_KR')
+                              .format(DateTime.now()),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 36,
+                              color: Colors.black),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 12,
+                    ),
+                    Text(
+                      '${DateFormat('M.d').format(DateTime.parse(_data!.cacheTime))} ~ ${DateFormat('M.d').format(DateTime.now())}의 트렌드',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 6,
+                    ),
+                    const Divider(
+                      thickness: 2,
+                      color: Color(0xFFCCCCCC),
+                    ),
+                    const SizedBox(
+                      height: 6,
+                    ),
+                    Expanded(
+                      child: ListView.separated(
+                        itemCount: _data!.keywords.length,
+                        itemBuilder: (context, index) {
+                          final keyword = _data!.keywords[index];
+                          return RankingCell(index: index, keyword: keyword);
+                        },
+                        separatorBuilder: (BuildContext context, int index) {
+                          return const SizedBox(height: 20);
+                        },
+                      ),
+                    ),
                   ],
-                )
-              ],
-            ),
-            const SizedBox(
-              height: 12,
-            ),
-            const Text(
-              '11.2 ~ 11.6 트렌드',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
+                ),
               ),
-            ),
-            const SizedBox(
-              height: 6,
-            ),
-            const SizedBox(
-              width: 150,
-              child: Divider(
-                thickness: 2,
-                color: Color(0xFFCCCCCC),
-              ),
-            ),
-            Expanded(
-              child: ListView.separated(
-                itemCount: 10,
-                itemBuilder: (context, index) {
-                  return RankingCell(index: index);
-                },
-                separatorBuilder: (BuildContext context, int index) {
-                  return const SizedBox(
-                    height: 10,
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
 }
 
 class RankingCell extends StatefulWidget {
+  final String keyword;
   final int index;
 
   const RankingCell({
-    super.key,
+    required this.keyword,
     required this.index,
+    super.key,
   });
 
   @override
   State<RankingCell> createState() => _RankingCellState();
 }
 
-class _RankingCellState extends State<RankingCell>
-    with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _animation;
-
+class _RankingCellState extends State<RankingCell> {
   bool isTapDown = false;
   // get ranking list box
   late Box box;
@@ -128,83 +144,104 @@ class _RankingCellState extends State<RankingCell>
         box = value;
       });
     });
-
-    _animationController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 100));
-    _animation =
-        Tween<double>(begin: 1, end: 0.96).animate(_animationController)
-          ..addListener(() {
-            setState(() {});
-          });
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapCancel: () async {
-        print('tap cancel');
-        setState(() {
-          isTapDown = false;
-        });
-        await _animationController.animateBack(0);
-      },
-      onTapDown: (TapDownDetails details) async {
-        print('tap down');
-        await _animationController.forward();
-        setState(() {
-          isTapDown = true;
-        });
-      },
-      onTapUp: (TapUpDetails details) async {
-        print('tap up');
-        setState(() {
-          isTapDown = false;
-        });
-        await _animationController.animateBack(0);
-      },
       onTap: () async {
         Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const DetailScreen()));
-      },
-      child: ScaleTransition(
-        scale: _animation,
-        child: Container(
-          decoration: BoxDecoration(
-            color: isTapDown ? Colors.grey.withOpacity(0.1) : Colors.white,
-            borderRadius: BorderRadius.circular(6),
+          MaterialPageRoute(
+            builder: (context) => const DetailScreen(),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6.0),
-            child: Row(
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: isTapDown ? Colors.grey.withOpacity(0.1) : Colors.white,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: 40,
+              alignment: Alignment.center,
+              child: Text(
+                '${widget.index + 1}',
+                style:
+                    const TextStyle(fontSize: 30, fontWeight: FontWeight.w800),
+              ),
+            ),
+            const SizedBox(width: 20),
+            Row(
               children: [
-                const SizedBox(width: 8),
-                SizedBox(
-                    width: 40,
-                    child: Text('${widget.index + 1}',
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w800))),
-                const Row(
-                  children: [
-                    Text('장인호',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w600)),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      'new',
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.red),
-                    )
-                  ],
+                Text(
+                  widget.keyword,
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.w600),
                 ),
+                const SizedBox(width: 10),
+                _randomWidget(),
               ],
             ),
-          ),
+          ],
         ),
       ),
     );
+  }
+
+  Widget _randomWidget() {
+    final random = Random();
+    final randomInt = random.nextInt(100);
+    // divide 5 sections
+    if (randomInt < 20) {
+      return const SizedBox();
+    } else if (randomInt < 40) {
+      return Row(
+        children: [
+          const Icon(
+            Icons.arrow_upward,
+            color: Colors.red,
+          ),
+          Text(
+            '${random.nextInt(7) + 1}',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.red,
+            ),
+          ),
+        ],
+      );
+    } else if (randomInt < 60) {
+      return Row(
+        children: [
+          const Icon(
+            Icons.arrow_downward,
+            color: Colors.blue,
+          ),
+          Text(
+            '${random.nextInt(7) + 1}',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.blue,
+            ),
+          ),
+        ],
+      );
+    } else if (randomInt < 80) {
+      return const SizedBox();
+    } else {
+      return const Text(
+        "NEW",
+        style: TextStyle(
+          color: Colors.red,
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+        ),
+      );
+    }
   }
 }
