@@ -8,13 +8,14 @@ import 'package:intl/intl.dart';
 import 'package:issue_tracker_v2/model/related_search_term.dart';
 
 enum TendencyType {
-  red('보수', Color(0xFFF8462F)),
-  blue('진보', Color(0xFF305FF2));
+  red('보수', Color(0xFFF8462F), Color(0xFFFBC4BD)),
+  blue('진보', Color(0xFF305FF2), Color(0xFFD2E7FA));
 
-  const TendencyType(this.text, this.color);
+  const TendencyType(this.text, this.startColor, this.endColor);
 
   final String text;
-  final Color color;
+  final Color startColor;
+  final Color endColor;
 }
 
 class DetailScreen extends StatefulWidget {
@@ -105,6 +106,7 @@ class _DetailScreenState extends State<DetailScreen> {
                             child: Row(
                               children: [
                                 _buildLinearGraphCell(
+                                    index: index,
                                     type: TendencyType.blue,
                                     title: '${relatedSearchTerm.liberal[index][0]}',
                                     percent: relatedSearchTerm.liberal[index][1]),
@@ -117,6 +119,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                   )),
                                 ),
                                 _buildLinearGraphCell(
+                                    index: index,
                                     type: TendencyType.red,
                                     title: '${relatedSearchTerm.conservative[index][0]}',
                                     percent: relatedSearchTerm.conservative[index][1]),
@@ -135,23 +138,31 @@ class _DetailScreenState extends State<DetailScreen> {
               ));
   }
 
-  Expanded _buildLinearGraphCell({required TendencyType type, required String title, required double percent}) {
+  Expanded _buildLinearGraphCell(
+      {required int index, required TendencyType type, required String title, required double percent}) {
     return Expanded(
       child: Column(
         crossAxisAlignment: type == TendencyType.blue ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: type.color)),
+          Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: type.startColor)),
           Container(
             height: 15,
             decoration: BoxDecoration(
-              color: type.color,
-              borderRadius: BorderRadius.circular(2),
+              color: _getColorAtStep(type.startColor, type.endColor, index + 1),
+              borderRadius: BorderRadius.circular(4),
             ),
             width: (MediaQuery.of(context).size.width / 2 - 80) * percent,
           ),
         ],
       ),
     );
+  }
+
+  Color _getColorAtStep(Color startColor, Color endColor, int selectedStep) {
+    double ratio = selectedStep / 10;
+    Color selectedColor = Color.lerp(startColor, endColor, ratio)!;
+
+    return selectedColor;
   }
 
   Future<void> _getRelatedSearchTerms() async {
@@ -173,5 +184,4 @@ class _DetailScreenState extends State<DetailScreen> {
       isLoading = false;
     });
   }
-
 }
