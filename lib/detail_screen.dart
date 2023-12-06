@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
+import 'package:intl/intl.dart';
 import 'package:issue_tracker_v2/model/related_search_term.dart';
 
 enum TendencyType {
@@ -63,7 +64,7 @@ class _DetailScreenState extends State<DetailScreen> {
                     const SizedBox(height: 12),
                     Text(
                       // '11.2 ~ 11.6 트렌드',
-                      '${cacheTimeMinus4days.month}.${cacheTimeMinus4days.day} ~ ${cacheTime.month}.${cacheTime.day} 트렌드',
+                      '${DateFormat('M.d').format(cacheTimeMinus4days)} ~ ${DateFormat('M.d').format(cacheTime)} 트렌드',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -153,11 +154,14 @@ class _DetailScreenState extends State<DetailScreen> {
 
   Future<void> getRelatedSearchTerms() async {
     Uri relatedSearchTermsUrl = Uri.parse('https://ow3gdfmu6zikegskhm6wozyobm0ylczz.lambda-url.ap-northeast-2.on.aws/');
-    Response response = await http.get(relatedSearchTermsUrl);
+    Response response = await http.get(relatedSearchTermsUrl, headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    });
 
     String cacheTimeString = jsonDecode(response.body)['cache_time'];
     cacheTime = DateTime.parse(cacheTimeString);
-    cacheTimeMinus4days =  cacheTime.subtract(const Duration(days: 4));
+    cacheTimeMinus4days = cacheTime.subtract(const Duration(days: 4));
     relatedSearchTerm = RelatedSearchTerm.fromJson(jsonDecode(response.body)['탄핵']);
 
     if (response.statusCode == 200) {
@@ -168,14 +172,4 @@ class _DetailScreenState extends State<DetailScreen> {
     });
   }
 
-  Future<void> getTop10() async {
-    Uri top10Url = Uri.parse('https://4hthfqzswiu4gm5f462wcuuuuy0mdjef.lambda-url.ap-northeast-2.on.aws/');
-
-    Response response = await http.get(top10Url);
-
-    print(jsonDecode(response.body));
-
-    if (response.statusCode == 200) {
-    } else {}
-  }
 }
