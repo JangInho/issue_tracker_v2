@@ -34,14 +34,11 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   void initState() {
     super.initState();
-
     _getRelatedSearchTerms();
   }
 
   @override
   Widget build(BuildContext context) {
-    Color blue = const Color(0xFF305FF2);
-    Color red = const Color(0xFFF8462F);
 
     return Scaffold(
         appBar: AppBar(
@@ -82,14 +79,14 @@ class _DetailScreenState extends State<DetailScreen> {
                         const Spacer(),
                         Text(
                           '진보',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: blue),
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: TendencyType.blue.startColor),
                         ),
                         const Spacer(),
                         const SizedBox(
                           width: 64,
                         ),
                         const Spacer(),
-                        Text('보수', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: red)),
+                        Text('보수', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: TendencyType.red.startColor)),
                         const Spacer(),
                       ],
                     ),
