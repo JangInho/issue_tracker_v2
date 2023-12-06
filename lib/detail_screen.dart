@@ -34,7 +34,7 @@ class _DetailScreenState extends State<DetailScreen> {
   void initState() {
     super.initState();
 
-    getRelatedSearchTerms();
+    _getRelatedSearchTerms();
   }
 
   @override
@@ -63,7 +63,6 @@ class _DetailScreenState extends State<DetailScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      // '11.2 ~ 11.6 트렌드',
                       '${DateFormat('M.d').format(cacheTimeMinus4days)} ~ ${DateFormat('M.d').format(cacheTime)} 트렌드',
                       style: const TextStyle(
                         fontSize: 16,
@@ -101,7 +100,7 @@ class _DetailScreenState extends State<DetailScreen> {
                       child: ListView.separated(
                         itemBuilder: (context, index) {
                           return SizedBox(
-                            height: 35,
+                            height: 40,
                             width: double.infinity,
                             child: Row(
                               children: [
@@ -143,16 +142,19 @@ class _DetailScreenState extends State<DetailScreen> {
         children: [
           Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: type.color)),
           Container(
-            height: 10,
+            height: 15,
+            decoration: BoxDecoration(
+              color: type.color,
+              borderRadius: BorderRadius.circular(2),
+            ),
             width: (MediaQuery.of(context).size.width / 2 - 80) * percent,
-            color: type.color,
           ),
         ],
       ),
     );
   }
 
-  Future<void> getRelatedSearchTerms() async {
+  Future<void> _getRelatedSearchTerms() async {
     Uri relatedSearchTermsUrl = Uri.parse('https://ow3gdfmu6zikegskhm6wozyobm0ylczz.lambda-url.ap-northeast-2.on.aws/');
     Response response = await http.get(relatedSearchTermsUrl, headers: {
       'Content-Type': 'application/json',
