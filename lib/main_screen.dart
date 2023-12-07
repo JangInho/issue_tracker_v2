@@ -152,7 +152,7 @@ class _RankingCellState extends State<RankingCell> {
       onTap: () async {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => const DetailScreen(),
+            builder: (context) => DetailScreen(term: widget.keyword),
           ),
         );
       },

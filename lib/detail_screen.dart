@@ -19,7 +19,8 @@ enum TendencyType {
 }
 
 class DetailScreen extends StatefulWidget {
-  const DetailScreen({super.key});
+  String term;
+  DetailScreen({super.key, required this.term});
 
   @override
   State<DetailScreen> createState() => _DetailScreenState();
@@ -55,9 +56,9 @@ class _DetailScreenState extends State<DetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '탄핵',
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 32, color: Colors.black),
+                    Text(
+                      widget.term,
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 32, color: Colors.black),
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -172,7 +173,7 @@ class _DetailScreenState extends State<DetailScreen> {
     String cacheTimeString = jsonDecode(response.body)['cache_time'];
     cacheTime = DateTime.parse(cacheTimeString);
     cacheTimeMinus4days = cacheTime.subtract(const Duration(days: 4));
-    relatedSearchTerm = RelatedSearchTerm.fromJson(jsonDecode(response.body)['탄핵']);
+    relatedSearchTerm = RelatedSearchTerm.fromJson(jsonDecode(response.body)[widget.term]);
 
     if (response.statusCode == 200) {
     } else {}
