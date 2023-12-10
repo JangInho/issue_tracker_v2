@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
@@ -29,7 +30,6 @@ class DetailScreen extends StatefulWidget {
 class _DetailScreenState extends State<DetailScreen> {
   bool isLoading = true;
   late DateTime cacheTime;
-  late DateTime cacheTimeMinus4days;
   late RelatedSearchTerm relatedSearchTerm;
 
   @override
@@ -40,7 +40,6 @@ class _DetailScreenState extends State<DetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -58,11 +57,14 @@ class _DetailScreenState extends State<DetailScreen> {
                   children: [
                     Text(
                       widget.term,
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 32, color: Colors.black),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 32,
+                          color: Colors.black),
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      '${DateFormat('M.d').format(cacheTimeMinus4days)} ~ ${DateFormat('M.d').format(cacheTime)} 트렌드',
+                      '${DateFormat('M.d').format(cacheTime)} ~ ${DateFormat('M.d').format(DateTime.now())} 트렌드',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -72,7 +74,8 @@ class _DetailScreenState extends State<DetailScreen> {
                     const Center(
                       child: Text(
                         '연관 검색어',
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.w600),
                       ),
                     ),
                     Row(
@@ -80,14 +83,21 @@ class _DetailScreenState extends State<DetailScreen> {
                         const Spacer(),
                         Text(
                           '진보',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: TendencyType.blue.startColor),
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                              color: TendencyType.blue.startColor),
                         ),
                         const Spacer(),
                         const SizedBox(
                           width: 64,
                         ),
                         const Spacer(),
-                        Text('보수', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: TendencyType.red.startColor)),
+                        Text('보수',
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w500,
+                                color: TendencyType.red.startColor)),
                         const Spacer(),
                       ],
                     ),
@@ -106,21 +116,27 @@ class _DetailScreenState extends State<DetailScreen> {
                                 _buildLinearGraphCell(
                                     index: index,
                                     type: TendencyType.blue,
-                                    title: '${relatedSearchTerm.liberal[index][0]}',
-                                    percent: relatedSearchTerm.liberal[index][1]),
+                                    title:
+                                        '${relatedSearchTerm.liberal[index][0]}',
+                                    percent: relatedSearchTerm.liberal[index]
+                                        [1]),
                                 SizedBox(
                                   width: 40,
                                   child: Center(
                                       child: Text(
                                     '${index + 1}',
-                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                                    style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600),
                                   )),
                                 ),
                                 _buildLinearGraphCell(
                                     index: index,
                                     type: TendencyType.red,
-                                    title: '${relatedSearchTerm.conservative[index][0]}',
-                                    percent: relatedSearchTerm.conservative[index][1]),
+                                    title:
+                                        '${relatedSearchTerm.conservative[index][0]}',
+                                    percent: relatedSearchTerm
+                                        .conservative[index][1]),
                               ],
                             ),
                           );
@@ -137,12 +153,21 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   Expanded _buildLinearGraphCell(
-      {required int index, required TendencyType type, required String title, required double percent}) {
+      {required int index,
+      required TendencyType type,
+      required String title,
+      required double percent}) {
     return Expanded(
       child: Column(
-        crossAxisAlignment: type == TendencyType.blue ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: type == TendencyType.blue
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         children: [
-          Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: type.startColor)),
+          Text(title,
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: type.startColor)),
           Container(
             height: 15,
             decoration: BoxDecoration(
@@ -164,7 +189,8 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   Future<void> _getRelatedSearchTerms() async {
-    Uri relatedSearchTermsUrl = Uri.parse('https://ow3gdfmu6zikegskhm6wozyobm0ylczz.lambda-url.ap-northeast-2.on.aws/');
+    Uri relatedSearchTermsUrl = Uri.parse(
+        'https://ow3gdfmu6zikegskhm6wozyobm0ylczz.lambda-url.ap-northeast-2.on.aws/');
     Response response = await http.get(relatedSearchTermsUrl, headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -172,8 +198,8 @@ class _DetailScreenState extends State<DetailScreen> {
 
     String cacheTimeString = jsonDecode(response.body)['cache_time'];
     cacheTime = DateTime.parse(cacheTimeString);
-    cacheTimeMinus4days = cacheTime.subtract(const Duration(days: 4));
-    relatedSearchTerm = RelatedSearchTerm.fromJson(jsonDecode(response.body)[widget.term]);
+    relatedSearchTerm =
+        RelatedSearchTerm.fromJson(jsonDecode(response.body)[widget.term]);
 
     if (response.statusCode == 200) {
     } else {}
