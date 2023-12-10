@@ -6,9 +6,10 @@ class RelatedSearchTerm {
 
   factory RelatedSearchTerm.fromJson(Map<String, dynamic> json) {
     return RelatedSearchTerm(
-      liberal: List.generate(json['liberal'].length, (index) => json['liberal'][index]),
-      conservative: List.generate(json['conservative'].length, (index) => json['liberal'][index]),
+      liberal: List.generate(
+          json['liberal'].length, (index) => json['liberal'][index]),
+      conservative: List.generate(
+          json['conservative'].length, (index) => json['conservative'][index]),
     );
   }
-
 }
